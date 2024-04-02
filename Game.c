@@ -28,7 +28,8 @@ Keep options for inventory and equipments with Bool inventory and bool equipment
 #include<stdio.h>
 #include<stdlib.h>
 #include<Windows.h>
-#include<mmsystem.h>
+#include<mmsystem.h>
+
 
 
 
@@ -57,6 +58,9 @@ Keep options for inventory and equipments with Bool inventory and bool equipment
 HANDLE outputHandle; //Console Handler
 HANDLE inputHandle; //Console Handler
 
+CONSOLE_CURSOR_INFO invisiCursor = { 5, FALSE }; //Prepares data about an invisible cursor
+CONSOLE_CURSOR_INFO   visiCursor = { 5,  TRUE }; //Prepares data about a    visible cursor
+
 int health;
 int maxHealth;
 int hasAmulet;
@@ -73,17 +77,20 @@ InitProperties()
 {
     SetConsoleOutputCP(65001); //set console text to utf-8 mode (basically utf-8 has more characters than standard char's 7 bits)
 
+
+    //system("mode 8000,8000");
     ShowWindow(GetConsoleWindow(), SW_SHOWMAXIMIZED); //Fullscreen the console //system("mode x,y") doesn't seem to put console to top-left corner
+
 
     outputHandle = GetStdHandle(STD_OUTPUT_HANDLE); //the console we're using
     inputHandle = GetStdHandle(STD_INPUT_HANDLE); //the console we're using
 
+
+    HideConsoleCursor();
+
+
     SetColorToDefault(); //sets text color to normal
 
-    CONSOLE_CURSOR_INFO cursor; //Prepares data about an invisible cursor
-    cursor.dwSize = 100;
-    cursor.bVisible = FALSE;
-    SetConsoleCursorInfo(outputHandle, &cursor); //Changes the current cursor values to the data we prepared
 
     CONSOLE_SCREEN_BUFFER_INFO screen;
     GetConsoleScreenBufferInfo(outputHandle, &screen);
@@ -94,7 +101,7 @@ InitNewGame()
 {
     ClearOutput();
     maxHealth = Default_Health, health = Default_Health;
-    hasAmulet=0,tempMode=0;
+    hasAmulet = 0, tempMode = 0;
     gameStart();
 }
 
@@ -107,6 +114,17 @@ SetColor(int color)
 SetColorToDefault()
 {
     SetConsoleTextAttribute(outputHandle, White);
+}
+
+
+ShowConsoleCursor()
+{
+    SetConsoleCursorInfo(outputHandle, &  visiCursor); //Changes the current cursor values to the data we prepared
+}
+
+HideConsoleCursor()
+{
+    SetConsoleCursorInfo(outputHandle, &invisiCursor); //Changes the current cursor values to the data we prepared
 }
 
 
@@ -171,10 +189,9 @@ PlayerHealth(int h) // █ ▓ ▒ ░ ■ ▬ -
 EnemyHealth(int h) // █ ▓ ▒ ░ ■ ▬ - //Separate troll and draugr HP display?
 {
     printf("\t\t\tEnemy Health:  \t");
-    int x=h/10;
     SetColor(Red);
+    int x=h/10,y=h%10;
     for(int i=0; i<x; i++) printf("█ ");
-    int y=h%10;
     if(y!=0)
     {
         x++; if(y>6) printf("▓ "); //7 8 9
@@ -406,6 +423,7 @@ helpMenu()
     printf("Every letter in the answer of the riddle is automatically capitalized.\n");
     printf("BackSpace is disabled for the riddle so answers must be given without mistakes.\n\n\n\n");
     printf("Press any key to return to the Main Menu");
+    InputtedChar();
     return mainMenu();
 }
 
@@ -415,7 +433,9 @@ gameStart()
     ClearOutput();
     tempMode=2;
     GradualPrint("Insert Player Name: ");
+    ShowConsoleCursor();
     gets(name);
+    HideConsoleCursor();
     name[0]=toupper(name[0]);
     tempMode=0;
     GradualPrint("Welcome, @, to The Lost Library: A Cavernous Challenge\n");
@@ -450,7 +470,7 @@ cavernEntrance()
     GradualPrint("What do you do?\n\n");
     tempMode=2;
     GradualPrint("\tUse (E)xplosive Fireball Spell\n");
-    GradualPrint("\tGo Retrun to (M)ain Menu\n\n");
+    GradualPrint("\tReturn to (M)ain Menu\n\n");
     int flag=1;
     while(1)
     {
@@ -478,7 +498,7 @@ cavernInside()
     GradualPrint("As you walk through, you enter a chamber full of coffins and burial urns.\n");
     GradualPrint("As you move one step, you hear a *click\n");
     tempMode=2;
-    GradualPrint("A coffin bursts open and a Draugr Death Overlord steps out.\n");
+    GradualPrint("Suddenly, a coffin bursts open and a Draugr Death Overlord steps out.\n");
     GradualPrint("It jumps at you and with a slash of its sword lands a hit on you.\n\n");
     health-=24;
     PlayerHealth(health);
@@ -641,11 +661,13 @@ outsideTemple()
     GradualPrint("I HAVE NO LEGS YET I OUTRUN EVERYONE......WHAT AM I?\"\n\n");
     int wrong=0,i=0;
     char a[]="TIME";
+    ShowConsoleCursor();
     for(char c=InputtedChar(); c!='\r'; c=InputtedChar())
     {
         printf("%c",c);
         if(i>=4 || c!=a[i++]) wrong=1;
     }
+    HideConsoleCursor();
     if(i!=4) wrong=1;
     //enter ends input && disabled backspace (must answer without mistakes)
     if(wrong) return wrongAnswer();
