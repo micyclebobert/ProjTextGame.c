@@ -1,4 +1,4 @@
-Download Game.exe to play
+Download Game.exe to play (also download a.wav and keep both files in the same folder)
 
 Runs only on windows (tested on 10/11 but idk bout others)
 
