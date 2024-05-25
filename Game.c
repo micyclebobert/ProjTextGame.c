@@ -83,7 +83,7 @@ InitProperties()
 
 
     outputHandle = GetStdHandle(STD_OUTPUT_HANDLE); //the console we're using
-    inputHandle = GetStdHandle(STD_INPUT_HANDLE); //the console we're using
+    inputHandle  = GetStdHandle(STD_INPUT_HANDLE); //the console we're using
 
 
     HideConsoleCursor();
