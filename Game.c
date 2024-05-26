@@ -51,45 +51,112 @@ Keep options for inventory and equipments with Bool inventory and bool equipment
 #define Light_Yellow    14
 #define Bright_White    15
 
+#define Default_Color    7
+
+
 #define Default_Health 100
 #define Name_Placeholder '@'
 
-
+/*
+HANDLE is a custom data type from Windows.h */
 HANDLE outputHandle; //Console Handler
-HANDLE inputHandle; //Console Handler
+HANDLE  inputHandle; //Console Handler
 
-CONSOLE_CURSOR_INFO invisiCursor = { 5, FALSE }; //Prepares data about an invisible cursor
-CONSOLE_CURSOR_INFO   visiCursor = { 5,  TRUE }; //Prepares data about a    visible cursor
+/*
+CONSOLE_CURSOR_INFO              = { size, boolean }  //Custom data type from Windows.h */
+CONSOLE_CURSOR_INFO invisiCursor = {    5,   FALSE }; //Prepares data about an invisible cursor
+CONSOLE_CURSOR_INFO   visiCursor = {    5,    TRUE }; //Prepares data about a    visible cursor
 
-int health;
 int maxHealth;
+int health;
+int healthBeforeAmulet;
 int hasAmulet;
 int tempMode;
 int defMode=0;
+int autoCaps=2;
+int highlightName=1;
 int width;
-char name[];
+char name[1000];
+
+
+
+
+
+
+void InitProperties();
+void InitNewGame();
+void SetColor(int color);
+void ShowConsoleCursor();
+void HideConsoleCursor();
+void ClearInputBuffer();
+void ClearOutput();
+char InputtedChar();
+void Wait(int ms);
+void PlayerHealth(int h) ;
+void EnemyHealth(int h) ;
+void GameOver(int state);
+void GradualPrint(char str[]);
+void CenteredPrint(char str[]);
+void SayMyName();
+void IllegalInput();
+void BlinkingProceed();
+void FadeOut();
+void PlayMusic(char addr[]);
+void mainMenu();
+void settingsMenu();
+void aboutMenu();
+void helpMenu();
+void gameStart();
+void startScene();
+void cavernEntrance();
+void cavernInside();
+void fightDraugr();
+void runFromDraugr();
+void defeatDraugr(int state);
+void furtherCavern(int state);
+void amuletRoom();
+void takeAmulet();
+void leaveAmulet();
+void outsideTemple();
+void wrongAnswer();
+void correctAnswer();
+void trollFight(int th, int state);
+void midFightTelekinesis(int th);
+void endFight(int th);
+void defeatTroll();
+void insideTemple();
+void contentGod();
+void angryGod();
+void noAmulet();
+char InputtedChar();
+
+
+
+
+
+
 
 
 
 
 ///Technical Functions
-InitProperties()
+void InitProperties()
 {
     SetConsoleOutputCP(65001); //set console text to utf-8 mode (basically utf-8 has more characters than standard char's 7 bits)
 
 
-    //system("mode 8000,8000");
-    ShowWindow(GetConsoleWindow(), SW_SHOWMAXIMIZED); //Fullscreen the console //system("mode x,y") doesn't seem to put console to top-left corner
+    system("mode 8000,8000");
+    ShowWindow(GetConsoleWindow(), SW_SHOWMAXIMIZED); //Fullscreen the console
 
 
-    outputHandle = GetStdHandle(STD_OUTPUT_HANDLE); //the console we're using
-    inputHandle  = GetStdHandle(STD_INPUT_HANDLE); //the console we're using
+    outputHandle = GetStdHandle(STD_OUTPUT_HANDLE); //If you imagine the console's text display process as a variable then outputHandle is the pointer to that variable
+    inputHandle  = GetStdHandle(STD_INPUT_HANDLE);  //If you imagine the console's text  input  process as a variable then  inputHandle is the pointer to that variable
 
 
     HideConsoleCursor();
 
 
-    SetColorToDefault(); //sets text color to normal
+    SetColor(Default_Color); //sets text color to normal
 
 
     CONSOLE_SCREEN_BUFFER_INFO screen;
@@ -97,7 +164,7 @@ InitProperties()
     width = screen.srWindow.Right; //we don't need to -Left coz we maximized the screen
 }
 
-InitNewGame()
+void InitNewGame()
 {
     ClearOutput();
     maxHealth = Default_Health, health = Default_Health;
@@ -106,38 +173,32 @@ InitNewGame()
 }
 
 
-SetColor(int color)
+void SetColor(int color)
 {
     SetConsoleTextAttribute(outputHandle, color);
 }
 
-SetColorToDefault()
+void ShowConsoleCursor()
 {
-    SetConsoleTextAttribute(outputHandle, White);
+    SetConsoleCursorInfo(outputHandle, &  visiCursor); //Replaces the current cursor values to the data we prepared
+}
+
+void HideConsoleCursor()
+{
+    SetConsoleCursorInfo(outputHandle, &invisiCursor); //Replaces the current cursor values to the data we prepared
 }
 
 
-ShowConsoleCursor()
-{
-    SetConsoleCursorInfo(outputHandle, &  visiCursor); //Changes the current cursor values to the data we prepared
-}
-
-HideConsoleCursor()
-{
-    SetConsoleCursorInfo(outputHandle, &invisiCursor); //Changes the current cursor values to the data we prepared
-}
-
-
-ClearInputBuffer()
+void ClearInputBuffer()
 {
     FlushConsoleInputBuffer(inputHandle);
     fflush(stdin);
 }
 
-ClearOutput()
+void ClearOutput()
 {
     system("cls");
-    SetColorToDefault();
+    SetColor(Default_Color);
     tempMode=0;
 }
 
@@ -145,19 +206,18 @@ ClearOutput()
 char InputtedChar()
 {
     ClearInputBuffer();
-    return toupper(getch());
-
+    int c=getch();
+    if(c==0||c==224)
+    {
+        getch();
+        c=0;
+    }
+    ClearInputBuffer();
+    return toupper(c);
 }
 
 
-unsigned int Decide(unsigned int x,unsigned int y)
-{
-    if(tempMode||defMode) return y;
-    return x;
-}
-
-
-Wait(unsigned int ms)
+void Wait(int ms)
 {
     if(ms>100) Sleep(ms); //Sleep is not too accurate, but its fine to be inaccurate in big waits (10000ms vs 10100ms is meh)
     else
@@ -168,7 +228,7 @@ Wait(unsigned int ms)
 }
 
 
-PlayerHealth(int h) // █ ▓ ▒ ░ ■ ▬ -
+void PlayerHealth(int h) // █ ▓ ▒ ░ ■ ▬ -
 {
     printf("\t\t\tPlayer Health: \t");
     int x=h/10;
@@ -177,16 +237,17 @@ PlayerHealth(int h) // █ ▓ ▒ ░ ■ ▬ -
     int y=h%10;
     if(y!=0)
     {
-        x++; if(y>6) printf("▓ "); //7 8 9
+        x++;
+        if(y>6) printf("▓ "); //7 8 9
         else if(y>3) printf("▒ "); //4 5 6
         else         printf("░ "); //1 2 3
     }
     for(int i=x; i<10; i++) printf("▬ ");
-    SetColorToDefault();
+    SetColor(Default_Color);
     printf("\n\n");
 }
 
-EnemyHealth(int h) // █ ▓ ▒ ░ ■ ▬ - //Separate troll and draugr HP display?
+void EnemyHealth(int h) // █ ▓ ▒ ░ ■ ▬ - //Separate troll and draugr HP display?
 {
     printf("\t\t\tEnemy Health:  \t");
     SetColor(Red);
@@ -194,24 +255,55 @@ EnemyHealth(int h) // █ ▓ ▒ ░ ■ ▬ - //Separate troll and draugr HP d
     for(int i=0; i<x; i++) printf("█ ");
     if(y!=0)
     {
-        x++; if(y>6) printf("▓ "); //7 8 9
+        x++;
+        if(y>6) printf("▓ "); //7 8 9
         else if(y>3) printf("▒ "); //4 5 6
         else         printf("░ "); //1 2 3
     }
     for(int i=x; i<10; i++) printf("▬ ");
-    SetColorToDefault();
+    SetColor(Default_Color);
     printf("\n\n");
 }
 
-GameOver(int state)
+void GameOver(int state)
 {
     if(state) SetColor(Red);
     else      SetColor(Aqua);
-    GradualPrint("{Game Over}\n\n");
-    SetColorToDefault();
+    GradualPrint("{Game Over}\n\n\n");
+    SetColor(Default_Color);
+    /*mainMenu*/ printf("\t\tReturn to (M)ain Menu\n");
+    if(state==2) printf("\t\tReturn to Last (C)heckpoint\n");
+    printf("(E)xit\n\n");
+    while(1)
+    {
+        switch(InputtedChar())
+        {
+        case 'M':
+            return mainMenu();
+            break;
+        case 'E':
+            return;
+            break;
+        case 'C':
+            if(state==2)
+            {
+                ClearOutput();
+                health=healthBeforeAmulet;
+                return amuletRoom();
+            }
+            else
+            {
+                IllegalInput();
+            }
+            break;
+        default:
+            IllegalInput();
+            break;
+        }
+    }
 }
 
-GradualPrint(char str[])
+void GradualPrint(char str[])
 {
     ClearInputBuffer();
     int len=strlen(str), i=0;
@@ -221,7 +313,8 @@ GradualPrint(char str[])
         {
             if(kbhit())
             {
-                getch();
+                int c=getch();
+                if(c==0||c==224) getch();
                 tempMode=1;
                 break;
             }
@@ -259,32 +352,32 @@ GradualPrint(char str[])
     }
 }
 
-CenteredPrint(char str[])
+void CenteredPrint(char str[])
 {
     int pad=(width-strlen(str))/2;
-    for(int i=0;i<pad;i++) printf(" ");
+    for(int i=0; i<pad; i++) printf(" ");
     printf("%s\n",str);
 }
 
-SayMyName()
+void SayMyName()
 {
-    SetColor(Aqua);
+    if(highlightName==1) SetColor(Aqua);
     GradualPrint(name);
-    SetColorToDefault();
+    if(highlightName==1) SetColor(Default_Color);
 }
 
-IllegalInput()
+void IllegalInput()
 {
-    printf("\nIllegal Input!!\n");
+    printf("\rIllegal Input!!");
 }
 
-BlinkingProceed()
+void BlinkingProceed()
 {
     printf("\n");
     SetColor(Gray);
     printf("\rPress any key to continue");
     Wait(75);
-    SetColorToDefault();
+    SetColor(Default_Color);
     int k=500;
     ClearInputBuffer();
     while(!kbhit())
@@ -294,11 +387,13 @@ BlinkingProceed()
         printf("\r                         ");
         Wait(k);
     }
-    getch();
+
+    int c=getch();
+    if(c==0||c==224) getch();
     tempMode=0;
 }
 
-FadeOut()
+void FadeOut()
 {
     system("color 8");
     Wait(50);
@@ -308,7 +403,7 @@ FadeOut()
 }
 
 
-PlayMusic(char addr[])
+void PlayMusic(char addr[])
 {
     PlaySound(addr, NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
 }
@@ -318,7 +413,7 @@ PlayMusic(char addr[])
 
 ///Story Functions
 /*
-templateFunction()
+void templateFunction()
 {
     ClearOutput();
     GradualPrint("Opening line with options for doing\n\n"
@@ -344,7 +439,7 @@ templateFunction()
 */
 
 
-mainMenu()
+void mainMenu()
 {
     ClearOutput();
     CenteredPrint("The Lost Library: A Cavernous Challenge\n\n\n");
@@ -352,8 +447,7 @@ mainMenu()
     CenteredPrint("(E)xit\n");
     CenteredPrint("(A)bout\n");
     CenteredPrint("(H)elp\n");
-    CenteredPrint("(S)ettings\n");
-    int flag=1;
+    CenteredPrint("(S)ettings\n\n");
     while(1)
     {
         switch(InputtedChar())
@@ -374,20 +468,26 @@ mainMenu()
             return settingsMenu();
             break;
         default:
-            if(--flag == 0) IllegalInput();
+            IllegalInput();
             break;
         }
     }
 }
 
-settingsMenu()
+void settingsMenu()
 {
     ClearOutput();
     printf("\tFast (C)utscenes: ");
-    if(defMode==0) printf("OFF\n");
-    else printf("ON\n");
-    printf("\n\t\tReturn to (M)ain Menu");
-    int flag=1;
+    if(defMode==0)       printf("OFF\n");
+    else                 printf("ON\n");
+    printf("\t(A)uto Capitalize Name: ");
+         if(autoCaps==0) printf("OFF\n");
+    else if(autoCaps==1) printf("First\n");
+    else                 printf("All\n");
+    printf("\t(H)ighlight Names: ");
+    if(highlightName==0) printf("OFF\n");
+    else                 printf("ON\n");
+    printf("\n\n\n\t\tReturn to (M)ain Menu\n\n");
     while(1)
     {
         switch(InputtedChar())
@@ -396,47 +496,71 @@ settingsMenu()
             defMode=!defMode;
             return settingsMenu();
             break;
+        case 'A':
+            autoCaps++;
+            if(autoCaps==3) autoCaps=0;
+            return settingsMenu();
+            break;
+        case 'H':
+            highlightName=!highlightName;
+            return settingsMenu();
+            break;
         case 'M':
             return mainMenu();
             break;
         default:
-            if(--flag == 0) IllegalInput();
+            IllegalInput();
             break;
         }
     }
 }
 
-aboutMenu()
+void aboutMenu()
 {
     ClearOutput();
     printf("A text based adventure game created by Group #1\n\n\n");
-    printf("Press any key to return to the Main Menu");
+    printf("\t             Name                 ID    \n");
+    printf("\t      Aoutul Nabi Purna       2412826042\n");
+    printf("\t         Shishir Dhar         2412876042\n");
+    printf("\t     Hasibur Rahman Hemal     2413800042\n");
+    printf("\t        Zareen Tasnim         2412912042\n");
+    printf("\nPress any key to return to the Main Menu\n");
     InputtedChar();
     return mainMenu();
 }
 
-helpMenu()
+void helpMenu()
 {
     ClearOutput();
     printf("Press the button corresponding to the single letter encapsulated in brackets to navigate that option.\n\n");
-    printf("First letter of the user - inputted name is automatically capitalized.\n\n");
+    printf("First letter of every word in the names are automatically capitalized.\n\n");
     printf("Every letter in the answer of the riddle is automatically capitalized.\n");
-    printf("BackSpace is disabled for the riddle so answers must be given without mistakes.\n\n\n\n");
+    printf("BackSpace is disabled for the riddle so answers must be given without mistakes.\n\n");
+    printf("Some quality of life features can be adjusted in the settings.\n\n\n\n");
     printf("Press any key to return to the Main Menu");
     InputtedChar();
     return mainMenu();
 }
 
 
-gameStart()
+void gameStart()
 {
     ClearOutput();
     tempMode=2;
     GradualPrint("Insert Player Name: ");
+    ClearInputBuffer();
     ShowConsoleCursor();
-    gets(name);
+    fgets(name,1000,stdin);
     HideConsoleCursor();
-    name[0]=toupper(name[0]);
+    if(autoCaps>=1) name[0]    =     toupper(name[0]);
+    if(autoCaps==2)
+    {
+        for(int i=0; name[i]!=0; i++)
+        {
+            if(name[i]=='\n') name[i]=0;
+            if(i!=0&&name[i+1]==' ') toupper(name[i]);
+        }
+    }
     tempMode=0;
     GradualPrint("Welcome, @, to The Lost Library: A Cavernous Challenge\n");
     Wait(1000);
@@ -444,7 +568,7 @@ gameStart()
     return startScene();
 }
 
-startScene()
+void startScene()
 {
     ClearOutput();
     GradualPrint("With a pounding heart, you grip the map, the worn parchment crackling in your hands.\n");
@@ -460,7 +584,7 @@ startScene()
     return cavernEntrance();
 }
 
-cavernEntrance()
+void cavernEntrance()
 {
     ClearOutput();
     GradualPrint("You descend into the cavern entrance, the sun's light fading behind you.\n");
@@ -471,7 +595,6 @@ cavernEntrance()
     tempMode=2;
     GradualPrint("\tUse (E)xplosive Fireball Spell\n");
     GradualPrint("\tReturn to (M)ain Menu\n\n");
-    int flag=1;
     while(1)
     {
         switch(InputtedChar())
@@ -483,13 +606,13 @@ cavernEntrance()
             return mainMenu();
             break;
         default:
-            if(--flag == 0) IllegalInput();
+            IllegalInput();
             break;
         }
     }
 }
 
-cavernInside()
+void cavernInside()
 {
     ClearOutput();
     GradualPrint("The rock crumbles into pieces revealing the path.\n");
@@ -504,7 +627,6 @@ cavernInside()
     PlayerHealth(health);
     GradualPrint("\t(F)ight Back, use Chain Lightning\n");
     GradualPrint("\t(R)un Away\n\n");
-    int flag=1;
     while(1)
     {
         switch(InputtedChar())
@@ -516,13 +638,13 @@ cavernInside()
             return runFromDraugr();
             break;
         default:
-            if(--flag == 0) IllegalInput();
+            IllegalInput();
             break;
         }
     }
 }
 
-fightDraugr()
+void fightDraugr()
 {
     ClearOutput();
     PlayerHealth(health);
@@ -535,7 +657,7 @@ fightDraugr()
     return GameOver(1);
 }
 
-runFromDraugr()
+void runFromDraugr()
 {
     ClearOutput();
     tempMode=2;
@@ -552,7 +674,7 @@ runFromDraugr()
     return GameOver(1);
 }
 
-defeatDraugr(int state)
+void defeatDraugr(int state)
 {
     ClearOutput();
     tempMode=2;
@@ -570,7 +692,7 @@ defeatDraugr(int state)
     return furtherCavern(state);
 }
 
-furtherCavern(int state)
+void furtherCavern(int state)
 {
     ClearOutput();
     GradualPrint("@ continues on his path.\n");
@@ -585,10 +707,11 @@ furtherCavern(int state)
     BlinkingProceed();
     ClearOutput();
     GradualPrint("@ continues on to a deeper chamber.\n");
+    healthBeforeAmulet=health;
     return amuletRoom();
 }
 
-amuletRoom()
+void amuletRoom()
 {
     GradualPrint("The room is full of old shelves full of books and scrolls.\n");
     GradualPrint("There is a study table in the corner of the room with a skeleton sitting in front of it.\n");
@@ -598,7 +721,6 @@ amuletRoom()
     tempMode=2;
     GradualPrint("\t(T)ake the amulet\n");
     GradualPrint("\t(L)eave the amulet\n\n");
-    int flag=1;
     while(1)
     {
         switch(InputtedChar())
@@ -610,13 +732,13 @@ amuletRoom()
             return leaveAmulet();
             break;
         default:
-            if(--flag == 0) IllegalInput();
+            IllegalInput();
             break;
         }
     }
 }
 
-takeAmulet()
+void takeAmulet()
 {
     ClearOutput();
     tempMode=2;
@@ -634,7 +756,7 @@ takeAmulet()
     return outsideTemple();
 }
 
-leaveAmulet()
+void leaveAmulet()
 {
     ClearOutput();
     GradualPrint("@ notices a book open on the desk. It reads: \"Time...It has been time all along...\"");
@@ -648,7 +770,7 @@ leaveAmulet()
     return outsideTemple();
 }
 
-outsideTemple()
+void outsideTemple()
 {
     ClearOutput();
     GradualPrint("You notice a giant stone door at the end of the chamber.\n");
@@ -664,8 +786,11 @@ outsideTemple()
     ShowConsoleCursor();
     for(char c=InputtedChar(); c!='\r'; c=InputtedChar())
     {
-        printf("%c",c);
-        if(i>=4 || c!=a[i++]) wrong=1;
+        if(c>='A'&&c<='Z')
+        {
+            printf("%c",c);
+            if(i>=4 || c!=a[i++]) wrong=1;
+        }
     }
     HideConsoleCursor();
     if(i!=4) wrong=1;
@@ -674,7 +799,7 @@ outsideTemple()
     else return correctAnswer();
 }
 
-wrongAnswer()
+void wrongAnswer()
 {
     ClearOutput();
     GradualPrint("\"YOU HAVE CHOSEN POORLY\"\n");
@@ -682,14 +807,10 @@ wrongAnswer()
     GradualPrint("You hear a click... thousands of poison darts shoot out of various holes surrounding the door\n");
     GradualPrint("@ meets a gruesome end, falling to the ground bleeding to death \n\n");
     tempMode=0;
-    return GameOver(1);
-    //Do you wish to go back to the last checkpoint
-    //Make sure player health is reset back to what it was during amulet room
-    //ClearOutput();
-    //return amuletRoom();
+    return GameOver(2);
 }
 
-correctAnswer()
+void correctAnswer()
 {
     ClearOutput();
     GradualPrint("\"YOU HAVE CHOSEN WISELY\"\n");
@@ -706,28 +827,27 @@ correctAnswer()
     GradualPrint("\tCast (E)xplosive Chain Lightning\n");
     GradualPrint("\tCast (F)ireball\n");
     GradualPrint("\tConjure a magical (S)hield\n\n");
-    int flag=1;
     while(1)
     {
         switch(InputtedChar())
         {
         case 'E':
-            return trollFight(70,0);
+            return trollFight(80,0);
             break;
         case 'F':
-            return trollFight(80,0);
+            return trollFight(85,0);
             break;
         case 'S':
             return trollFight(90,1);
             break;
         default:
-            if(--flag == 0) IllegalInput();
+            IllegalInput();
             break;
         }
     }
 }
 
-trollFight(int th, int state)
+void trollFight(int th, int state)
 {
     ClearOutput();
     tempMode=2;
@@ -744,31 +864,32 @@ trollFight(int th, int state)
     GradualPrint("\tUse (T)elekinesis {Throw rocks}\n");
     GradualPrint("\tUse Explosive (F)ireball\n");
     GradualPrint("\tUse Explosive (C)hain Lightning\n\n");
-    int flag=1;
     while(1)
     {
         switch(InputtedChar())
         {
         case 'T':
-            return midFightTelekinesis(th-20);
+            return midFightTelekinesis(th-10);
             break;
         case 'F':
+            return endFight(th-15);
+            break;
         case 'C':
-            return endFight(th-35);
+            return endFight(th-20);
             break;
         default:
-            if(--flag == 0) IllegalInput();
+            IllegalInput();
             break;
         }
     }
 }
 
-midFightTelekinesis(int th)
+void midFightTelekinesis(int th)
 {
     ClearOutput();
     tempMode=2;
     GradualPrint("@ throws boulders using telekinesis.\n");
-    th-=20;
+    EnemyHealth(th);
     GradualPrint("The troll has been stunned\n\n");
     GradualPrint("\tCast Explosive Chain (L)ightning\n");
     GradualPrint("\tCast Explosive Chain (F)ireball\n\n");
@@ -779,7 +900,7 @@ midFightTelekinesis(int th)
         {
         case 'L':
         case 'F':
-            return endFight(th-40);
+            return endFight(th-20);
             break;
         default:
             if(--flag == 0) IllegalInput();
@@ -788,54 +909,53 @@ midFightTelekinesis(int th)
     }
 }
 
-endFight(int th)
+void endFight(int th)
 {
     ClearOutput();
     tempMode=2;
     GradualPrint("The troll rips off its own arm and throws it at @.\n\n");
     GradualPrint("\t(D)odge\n");
     GradualPrint("\t(C)onjure Magical Shield\n");
-    GradualPrint("\t(U)se Healing Potion\n");
-    int flag=1;
+    GradualPrint("\t(U)se Healing Potion\n\n");
     while(1)
     {
         switch(InputtedChar())
         {
         case 'D':
         case 'C':
-            th-=35;
             EnemyHealth(th);
+            BlinkingProceed();
             return defeatTroll();
             break;
         case 'U':
             health=maxHealth;
             GradualPrint("The potion completely restores @'s health\n");
-            EnemyHealth(th);
             PlayerHealth(health);
+            EnemyHealth(th);
             GradualPrint("Then the attack hits @.\n");
             health-=25;
             PlayerHealth(health);
+            BlinkingProceed();
             return defeatTroll();
             break;
         default:
-            if(--flag == 0) IllegalInput();
+            IllegalInput();
             break;
         }
     }
 }
 
-defeatTroll()
+void defeatTroll()
 {
     ClearOutput();
     tempMode=2;
     GradualPrint("@ gets up, and says, \"Its time to end this!!\"\n\n");
     GradualPrint("\tTake a (G)amble\n\n");
-    int flag=1;
     while(InputtedChar()!='G')
     {
-        if(--flag==0) IllegalInput();
+        IllegalInput();
     }
-    GradualPrint("@ focuses more than he ever did in his entire life, maybe more that he ever thought he could\n");
+    GradualPrint("@ focuses more than he ever did in his entire life, maybe more than what anyone ever could\n");
     GradualPrint("@ combines the power of Explosive Lightning and Explosive Fireball\n");
     GradualPrint("@ coughs up blood at the raw power of the new spell, but he still perseveres.\n");
     health-=5;
@@ -847,7 +967,7 @@ defeatTroll()
     return insideTemple();
 }
 
-insideTemple()
+void insideTemple()
 {
     ClearOutput();
     GradualPrint("After taking out the troll, @ walks into the altar.\n");
@@ -864,7 +984,6 @@ insideTemple()
         GradualPrint("\"WHAT IS IT THAT YOU DESIRE MY CHILD?\"\n\n");
         GradualPrint("\tI want to (K)now all about time to deepen our institute’s understanding.\n");
         GradualPrint("\tI want to (C)ontrol time so I can rule over mankind.\n\n");
-        int flag=1;
         while(1)
         {
             switch(InputtedChar())
@@ -876,7 +995,7 @@ insideTemple()
                 return angryGod();
                 break;
             default:
-                if(--flag == 0) IllegalInput();
+                IllegalInput();
                 break;
             }
         }
@@ -888,7 +1007,7 @@ insideTemple()
     }
 }
 
-contentGod()
+void contentGod()
 {
     ClearOutput();
     GradualPrint("\"A NOBLE CHOICE, THIS BOOK CONTAINS ALL YOU NEED TO KNOW ABOUT TIME, FROM THE BEGINNING TO THE END\n");
@@ -899,7 +1018,7 @@ contentGod()
     return GameOver(0);
 }
 
-angryGod()
+void angryGod()
 {
     ClearOutput();
     GradualPrint("\"FOOLISH CHILD!\n");
@@ -912,7 +1031,7 @@ angryGod()
     return GameOver(0);
 }
 
-noAmulet()
+void noAmulet()
 {
     ClearOutput();
     GradualPrint("Examining the platform, @ finds a golden book.\n");
@@ -926,7 +1045,7 @@ noAmulet()
 
 
 
-main()
+int main()
 {
     PlayMusic("a.wav");
     InitProperties();
@@ -955,6 +1074,23 @@ main()
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+//    health=Default_Health;
+//    name[0]='X';
+//    name[1]=0;
+//    trollFight(70,0);
 
 /*
 Player Input: Name? *Game Starts
