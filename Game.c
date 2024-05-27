@@ -1,26 +1,10 @@
-/*Specific monsters are tied to their functions- players attack first unless, sneak attack
-In forest ,if goes deep , faces tiger, otherwise safe outside forest- then cave to fight
-Player character attack variable subject to buff or debuff
-Series of boolean values linked to reward items that affects attack values
-+possible curses affecting attacks
+/**
+Made for Windows CodeBlocks with GCC GNU Compiler
+Tested on Windows 10
+Make sure that a.wav is in the same folder as the exe
+**/
 
-*/
-//Due to how I coded it our game only works on Windows CodeBlocks's MinGW (GCC GNU) Compiler
 
-/*Opponent health red blocks [████████ ██]
-/*Player health green blocks [██████ ████]
-
-/console clear
-/choice of equiping any 1 amulet
-//potential sound
-/draugr fight chest has 1 potion
-/Main menu
-/Directly capture input Use Get function
-Check fgets get ch etc cplusplus.com/forum/articles/19975/ stackoverflow.com/questions/1798511/how-to-avoid-pressing-enter-with-getchar-for-reading-a-single-character-only
-Keep options for inventory and equipments with Bool inventory and bool equipments to switch when we want
-*/
-//conio.h->getch() is windows specific nonstandard function
-//On CodeBlocks go to Settings -> Compiler... -> Linker Settings -> Other Linker Options -> Add "-lwinmm" -> Ok
 #pragma execution_character_set( "utf-8" ) //tis depricated but whatever it works
 
 #include<time.h>
@@ -28,7 +12,7 @@ Keep options for inventory and equipments with Bool inventory and bool equipment
 #include<stdio.h>
 #include<stdlib.h>
 #include<Windows.h>
-#include<mmsystem.h>
+#include<mmsystem.h> //On CodeBlocks go to Settings -> Compiler... -> Linker Settings -> Other Linker Options -> Add "-lwinmm" -> Ok
 
 
 
@@ -97,6 +81,7 @@ void EnemyHealth(int h) ;
 void GameOver(int state);
 void GradualPrint(char str[]);
 void CenteredPrint(char str[]);
+void CenteredPrint2(char str[]);
 void SayMyName();
 void IllegalInput();
 void BlinkingProceed();
@@ -1090,115 +1075,3 @@ int main()
     InitProperties();
     mainMenu();
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//    health=Default_Health;
-//    name[0]='X';
-//    name[1]=0;
-//    trollFight(70,0);
-
-/*
-Player Input: Name? *Game Starts
-The Lost Library: A Cavernous Challenge GAME OUTLINE
-Mention Story: With a pounding heart, you grip the map, the worn parchment crackling in your hands. The librarian, Professor Chronos, has entrusted you with this perilous mission. "This library," he rasped, his voice laden with years, "holds knowledge that can reshape the very fabric of time. But be warned, young researcher, the journey will be fraught with danger."
-You descend into the cavern entrance, the sun's light fading behind you. The air grows damp and cool, the silence broken only by the dripping of water. Your torch flickers, casting eerie shadows on the cavern walls.
-You explore deeper and find your path blocked by a fallen rock. What do you do? *Use Explosive Fireball Spell *Go back(Quit Game)
-If Explosive Fireball used: The rock crumbles into pieces revealing the path. The cave walls have various carvings of ancient men performing rituals and sacrifices to what seems to the Time Lord. You remember Professor Chronos mentioning him as an ancient God worshiped by mortals in the 4th Era.
-As you walk through, you enter a chamber full of coffins and burial urns. As you move one step, you hear a *click. A coffin bursts open and a Draugr Death Overlord steps out. It jumps at you and with a slash of its sword lands a hit on you.
-*Health -24
-if*Fight Back= *Use Chain lightning spell= Draugr Health -28
-= Draugr hits back and misses= *Use Fireball Spell= Draugr Explodes into pieces. {Display Current Health after a fight scene ends}
-else*Run Away= tries to run but Draugr lands another fatal blow chopping [Insert Player Name]’s arm off. {Health -52} [Insert Player Name] falls to the ground. The Draugr is about to land another fatal blow:
-
-if*Use Explosive Fireball = Draugr Explodes into pieces= Player crawls and searches a chest nearby. Player luckily finds a health regeneration potion and drinks it. {Health +60} {Display Current health}
-else*Do nothing= Draugr chops [name] head off. {Game Over}
-[Insert Player Name] continues on his path. “The cave is ridden with traps and monsters! I should be more cautious...”
-Player rummages through the chest and finds:
--Health Regeneration Potions 2X {Reset Health to 100}
--Spell Tome on Explosive Chain Lightning{Explosive Chain Lightning Unlocked}
--Gold Coins 25X , Ruby 2X, Garnet 1X, Amulet of Enhanced Spell Casting {Player Auto-equips for 10% damage buff- just mention this as printf statement}
-[Insert Player Name] continues on to a deeper chamber. The room is full of old shelves full of books and scrolls. There is a study table in the corner of the room with a skeleton sitting in front of it. The skeleton has a gold neck amulet with a red ruby on it. “Stealing from the dead cannot be good, the amulet might be cursed. Sould I....”
-*Take the amulet *Leave it
-If *take the amulet: [Name] screams in agony as his left arm withers away, *Health-30 *Damage Debuff 30%
-Else *Leave it: Player notices a book open on the desk. It reads: “Time...It has been time all along...”
-You walk over to a shelf and go through the books.
-“Ancient scriptures and studies on the Time Lord..interesting...I should collect some for the professor.”
-You take the book and brush off the age-old dust.
-
-“Hmm..the book tells of timeline altering ritual altar in this cave. It says they worshiped the Lord and brought him gold and ornaments in exchange for wishes.”
-[Name]puts the book in his satchel and walks to a giant stone door at the end of the chamber. After pulling a lever sitting alongside the door, a loud voice growled across the room..
-“I HAVE NO VOICE, YET I SPEAK TO YOU EVERY HOUR. I HAVE NO HANDS YET I POINT THE WAY TO POWER. I HAVE NO EYES YET I WITNESS ALL THAT’S DONE. I HAVE NO LEGS YET I OUTRUN EVERYONE......WHAT AM I?”
-Scanf: correct answer is “time” uppercase or lower case
-If incorrect: “YOU HAVE CHOSEN POORLY” you hear a click... thousands of poison darts shoot out of various holes surrounding the door, piercing [name] all over.
-[name] falls to the ground bleeding to death {Game Over}{Start Over from skeleton sitting in front of desk}
-If correct: “YOU HAVE CHOSEN WISELY”
-The door roars and slowly slides apart. [Name] finds themselves in a massive room. The room is broad and oval in shape accentuating the sheer size. It has a podium like structure with seats all around the room facing a giant altar in the center. As soon as the player steps into the room, giant pillars surrounding the podium carrying lanterns lit up showing the grand room.
-As the player steps down the stairs leading to the altar, large boulders surrounding the altar start whirring around and piling up. [Name] watched as the boulders combined to form a gigantic stone troll. The troll roars “Intruder!!!” and starts to stomp around [Name]. As [Name] dodged those attacks , the troll has to be dealt with..
-*Cast Explosive Chain Lightning *Cast Fireball *Conjure a magical shield If *Cast Explosive Chain Lightning = Troll health-30.
-Troll kicks [Name]. [Name] gets flung onto a chair .{Health -20}
-If *Cast Fireball = Troll health -20
-
-Troll kicks [Name]. [Name] gets flung onto a chair .{Health -20}
-If *Conjure a magical shield= Troll breaks shield {Troll health-10} and kicks [Name]. [Name] gets flung onto a chair .{Health -20}{Display current health}
-Player gets back up..
-*Use Telekinesis {Throw rocks} *Use Explosive Fireball *Use Explosive Chain Lightning
-If *Telekinesis= [Name] throws boulders using telekinesis. Troll health -20
-Troll has been stunned, attack combo allowed *Explosive Chain lightning *Explosive Fireball
-For either use = Troll health -40
-If *Explosive Fireball / Explosive Chain Lightning = troll health – 35
-Troll rips off its own arm and throws at the adventurer.
-*Dodge *Conjure Magical Shield *Use Healing Potion
-If Dodge/Magical Shield = Attack blocked
-If healing potion = Player Health reset to 100, Boulder hits player Health – 25 {Display current health}
-Player gets up,
-“Its time to end this!!”
-*Cast Explosive Lightning + Explosive Fireball {Cost: Player health -5}
-[Name] combines the power of lightning and fireball. The fusion crashes down onto the troll blasting it to pieces.
-
-After taking out the troll, [Name] walks into the altar. On the altar stands tall the statue of the Time Lord. The stone sculpture is decorated with gold jewelries, diamonds , amethysts and rubies. He is depicted as standing in front of a ring of fire showing the endless cycle of life and rebirth, the flow of time itself.
-There is a wide platform where sacrifices and offerings were made to the God.
-{If the player took the golden necklace from the skeleton in the previous level they can offer that now to the god and get a wish fulfilled}
-If player has amulet =
-*Offer amulet = The player places the amulet on the platform. Instantly, the amulet catches on fire. The lanterns on the columns glow emerald green as the God’s statue speaks “WHAT IS IT THAT YOU DESIRE MY CHILD?”
-*I want to know all about time to deepen our institute’s understanding. *I want to control time so I can rule over mankind.
-If option1: “A NOBLE CHOICE, THIS BOOK CONTAINS ALL YOU NEED TO KNOW ABOUT TIME, FROM THE BEGINNING TO THE END, ALL THAT IS COMPREHENDABLE TO YOUR MORTAL LIMITS”, A glowing golden book emerges in thin air and falls to the adventurer’s hand. The air hums with ancient energy. You feel a surge of excitement as you delve into the forbidden knowledge, uncovering the secrets of time manipulation.{Game Over}
-If option 2: “FOOLISH CHILD! YOUR DESIRES ARE DARK AND TWISTED!! YOU DARE DESCECRATE MY TEMPLE WITH YOUR FILTH!! LEAVE NOW BEFORE I LOSE MY PATIENCE!!” The player is thrown away with a great force. The place starts to crumble and break apart. [Name] runs as the temple collapses, sealing the ancient history within it permanently. {Game Over}
-If no amulet: Examining the platform, [Name] finds a golden book. Titled ‘Eternal’ the book contains old writings on time itself. This could help deepen the understanding of time for the Chronological Institute!! The air hums with ancient
-
-energy. You feel a surge of excitement as you delve into the forbidden knowledge, uncovering the secrets of time manipulation.{Game Over}
-*/
-
