@@ -560,6 +560,7 @@ void helpMenu()
     printf("First letter of every word in the names are automatically capitalized.\n\n");
     printf("Every letter in the answer of the riddle is automatically capitalized.\n");
     printf("BackSpace is disabled for the riddle so answers must be given without mistakes.\n\n");
+    printf("Press any key during a scene to fast forward it.\n");
     printf("Some quality of life features can be adjusted in the settings.\n\n\n\n");
     printf("Press any key to return to the Main Menu");
     InputtedChar();
