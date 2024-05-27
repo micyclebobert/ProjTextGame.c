@@ -1,6 +1,6 @@
 /**
-Made for Windows CodeBlocks with GCC GNU Compiler
-Tested on Windows 10
+Made for Windows CodeBlocks MinGW suite (GCC GNU Compiler)
+Tested on Windows 10 and Windows 11
 Make sure that a.wav is in the same folder as the exe
 **/
 
